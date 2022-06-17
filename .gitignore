@@ -69,3 +69,7 @@ Temporary Items
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,macos
 
 # Custom rules (everything added below won't be overriden by 'Generate .gitignore File' if you use 'Update' option)
+app/airtemp.csv
+app/test_airtemp.csv
+__pycache__/code_thesis.cpython-38.pyc
+__pycache__/dash.cpython-39.pyc
