@@ -1,10 +1,11 @@
 from dash import Dash, dcc, html, Input, Output
 import plotly_express as px
 import pandas as pd
+import json
 
 app = Dash(__name__)
 
-df = pd.read_csv("airtemp.csv")
+df = pd.read_csv("/Users/serbanradulescu/Documents/master_thesis/app/airtemp.csv")
 df = df[["STATIONS_ID", "TT_TU", "year", "day", "month"]]
 df["STATIONS_ID"] = df["STATIONS_ID"].apply(lambda x: str(x).zfill(5))
 stations_id = df.STATIONS_ID.unique()
@@ -12,6 +13,20 @@ stations_id = df.STATIONS_ID.unique()
 data_temperature = {
     station: df[df["STATIONS_ID"] == station] for station in stations_id
 }
+
+coordinates = pd.read_csv(
+    "/Users/serbanradulescu/Documents/master_thesis/app/coordinates.csv"
+)
+coordinates.id = coordinates.id.apply(lambda x: str(x).zfill(5))
+ge_map = px.scatter_geo(
+    lon=coordinates.lon, lat=coordinates.lat, hover_name=coordinates.id
+)  # , locations="iso_alpha")
+ge_map.update_layout(
+    title="Locations in Germany<br>(Hover for id)",
+    geo_scope="europe",
+    geo=dict(projection_scale=7, center=dict(lat=51.5, lon=10)),
+    clickmode="event+select",
+)
 
 app.layout = html.Div(
     [
@@ -27,6 +42,8 @@ app.layout = html.Div(
         ),
         html.H4("Select the ids"),
         dcc.Dropdown(options=df.STATIONS_ID.unique(), value="01550", id="stations_id"),
+        dcc.Graph(figure=ge_map, id="basic-interactions",),
+        html.Div(id="map-selector"),
         html.H4("Select the time range"),
         dcc.RangeSlider(
             min=1950,
@@ -80,6 +97,16 @@ app.layout = html.Div(
         dcc.Graph(id="graph-with-slider"),
     ]
 )
+
+
+@app.callback(
+    Output("map-selector", "children"), Input("basic-interactions", "clickData")
+)
+def display_click_data(clickData):
+    if clickData == None:
+        return "Not yet selected"
+    selected_id = clickData["points"][0]["hovertext"]
+    return f"mda {selected_id} "
 
 
 @app.callback(
@@ -155,4 +182,3 @@ def update_figure(selected_years, parameter, id, reference):
 
 if __name__ == "__main__":
     app.run_server(debug=True)
-
