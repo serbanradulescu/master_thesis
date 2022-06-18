@@ -5,9 +5,13 @@ import pandas as pd
 app = Dash(__name__)
 
 df = pd.read_csv("airtemp.csv")
-df = df.groupby("year").mean()
-# print(df)
+df = df[["STATIONS_ID", "TT_TU", "year", "day", "month"]]
+df["STATIONS_ID"] = df["STATIONS_ID"].apply(lambda x: str(x).zfill(5))
+stations_id = df.STATIONS_ID.unique()
 
+data_temperature = {
+    station: df[df["STATIONS_ID"] == station] for station in stations_id
+}
 
 app.layout = html.Div(
     [
@@ -22,14 +26,39 @@ app.layout = html.Div(
             id="parameter",
         ),
         html.H4("Select the ids"),
-        dcc.Dropdown(options=df.STATIONS_ID.unique(), value="1550", id="stations_id"),
+        dcc.Dropdown(options=df.STATIONS_ID.unique(), value="01550", id="stations_id"),
         html.H4("Select the time range"),
         dcc.RangeSlider(
             min=1950,
             max=2020,
             step=None,
-            value=[1970, 2010],
+            value=[1960, 2010],
             id="year-slider",
+            marks={
+                1950: "1950",
+                1955: "",
+                1960: "1960",
+                1965: "",
+                1970: "1970",
+                1975: "",
+                1980: "1980",
+                1985: "",
+                1990: "1990",
+                1995: "",
+                2000: "2000",
+                2005: "",
+                2010: "2010",
+                2015: "",
+                2020: "2020",
+            },
+        ),
+        html.H4("Select the reference period"),
+        dcc.RangeSlider(
+            min=1950,
+            max=2020,
+            step=None,
+            value=[1960, 1980],
+            id="reference_slider",
             marks={
                 1950: "1950",
                 1955: "",
@@ -57,19 +86,63 @@ app.layout = html.Div(
     Output("graph-with-slider", "figure"),
     Input("year-slider", "value"),
     Input("parameter", "value"),
-    # Input("stations_id", "value"),
+    Input("stations_id", "value"),
+    Input("reference_slider", "value"),
 )
-def update_figure(selected_years, parameter):  # , id):
+def update_figure(selected_years, parameter, id, reference):
+    # CASE 1: parameter is temperature
     if parameter == "temperature":
-        print(selected_years[0], selected_years[1])
-        filtered_df = df[
-            (df.index >= selected_years[0]) & (df.index <= selected_years[1])
+
+        print(
+            selected_years[0],
+            selected_years[1],
+            id,
+            "reference",
+            reference[0],
+            reference[1],
+        )
+        filtered_df = data_temperature[id]
+        filtered_df = filtered_df[
+            (filtered_df.year >= selected_years[0])
+            & (filtered_df.year <= selected_years[1])
         ]
-        # filtered_df = filtered_df[filtered_df["STATIONS_ID"] == id]
-        # filtered_df = filtered_df.groupby("year").mean()
-        fig = px.line(x=filtered_df.index, y=filtered_df.TT_TU, title="Plot")
-        # fig.set_title("mda")
-        fig.update_layout(transition_duration=500)
+        filtered_df = filtered_df.groupby("year").mean()
+        ref_df = filtered_df[
+            (filtered_df.index >= reference[0]) & (filtered_df.index <= reference[1])
+        ]
+        avg_hist = ref_df["TT_TU"].mean()
+        max_hist = ref_df["TT_TU"].max()
+        min_hist = ref_df["TT_TU"].min()
+        filtered_df["7yrs_average"] = filtered_df.TT_TU.rolling(7).mean()
+        fig = px.line(
+            x=filtered_df.index,
+            y=[
+                filtered_df.TT_TU,
+                filtered_df["7yrs_average"],
+                [max_hist for x in filtered_df.TT_TU],
+                [avg_hist for x in filtered_df.TT_TU],
+                [min_hist for x in filtered_df.TT_TU],
+            ],
+            color_discrete_sequence=["blue", "orange", "red", "green", "black"],
+            # template="simple_white",
+        )
+        newnames = {
+            "wide_variable_0": "average_temperature",
+            "wide_variable_1": "7yrs_average",
+            "wide_variable_2": "historic max",
+            "wide_variable_3": "historic average",
+            "wide_variable_4": "historic minim",
+        }
+        fig.for_each_trace(lambda t: t.update(name=newnames[t.name]))
+        # fig.update_layout()
+        fig.update_layout(
+            title="Average temperatures in Germany point selected",
+            xaxis_title="year",
+            yaxis_title="% of hours with optimal temperature for Septoria",
+            legend_title="Legend",
+            transition_duration=500,
+            font=dict(family="Courier New, monospace", size=12, color="#4d4d4d"),
+        )
     else:
         fig = px.line(x=[1, 2, 3], y=[3, 4, 5], title="other plot")
     return fig
