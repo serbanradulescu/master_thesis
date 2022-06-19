@@ -9,7 +9,6 @@
 .AppleDouble
 .LSOverride
 *.zip
-*.txt
 *.pdf
 downloads/hourly/moisture/data/hourly/moisture.csv
 *-checkpoint.ipynb
