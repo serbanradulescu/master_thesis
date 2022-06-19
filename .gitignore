@@ -75,3 +75,4 @@ __pycache__/code_thesis.cpython-38.pyc
 __pycache__/dash.cpython-39.pyc
 app/test_script.py
 app/.~lock.coordinates.csv\#
+app_data/test_script.py

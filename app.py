@@ -8,26 +8,23 @@ app = Dash(__name__)
 
 # Step 1. Preparing the elements for the app
 # a. Getting the data:
-
-airtemp_hourly = pd.read_csv(
-    "/Users/serbanradulescu/Documents/master_thesis/app/airtemp.csv"
-)
+"""
+airtemp_hourly = pd.read_csv("app_data/airtemp.csv")
 airtemp_hourly = airtemp_hourly[["STATIONS_ID", "TT_TU", "year", "day", "month"]]
 airtemp_hourly["STATIONS_ID"] = airtemp_hourly["STATIONS_ID"].apply(
     lambda x: str(x).zfill(5)
 )
-stations_id = airtemp_hourly.STATIONS_ID.unique()
+
 
 data_temperature = {
     station: airtemp_hourly[airtemp_hourly["STATIONS_ID"] == station]
     for station in stations_id
 }
+"""
 
-coordinates = pd.read_csv(
-    "/Users/serbanradulescu/Documents/master_thesis/app/coordinates.csv"
-)
+coordinates = pd.read_csv("app_data/coordinates.csv")
 coordinates.id = coordinates.id.apply(lambda x: str(x).zfill(5))
-
+stations_id = coordinates.id.unique()
 # b. Plotting the map for Germany:
 ge_map = px.scatter_geo(
     lon=coordinates.lon, lat=coordinates.lat, hover_name=coordinates.id
@@ -146,7 +143,7 @@ def update_figure(selected_years, parameter, id, reference, month):
             reference[0],
             reference[1],
         )
-        df = data_temperature[id]
+        df = pd.read_csv(f"app_data/hourly/air_temperature/1950/{id}.csv")
         df = df[(df.year >= selected_years[0]) & (df.year <= selected_years[1])]
         df = df[(df.month >= month[0]) & (df.month <= month[1])]
         # print(month[0], month[1], filtered_df.month.unique())
