@@ -4,7 +4,7 @@ import pandas as pd
 import json
 
 app = Dash(__name__)
-
+server = app.server
 
 # Step 1. Preparing the elements for the app
 # a. Getting the data:
