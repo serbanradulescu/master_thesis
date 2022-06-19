@@ -9,13 +9,18 @@ app = Dash(__name__)
 
 # a. Getting the data:
 
-df = pd.read_csv("/Users/serbanradulescu/Documents/master_thesis/app/airtemp.csv")
-df = df[["STATIONS_ID", "TT_TU", "year", "day", "month"]]
-df["STATIONS_ID"] = df["STATIONS_ID"].apply(lambda x: str(x).zfill(5))
-stations_id = df.STATIONS_ID.unique()
+airtemp_hourly = pd.read_csv(
+    "/Users/serbanradulescu/Documents/master_thesis/app/airtemp.csv"
+)
+airtemp_hourly = airtemp_hourly[["STATIONS_ID", "TT_TU", "year", "day", "month"]]
+airtemp_hourly["STATIONS_ID"] = airtemp_hourly["STATIONS_ID"].apply(
+    lambda x: str(x).zfill(5)
+)
+stations_id = airtemp_hourly.STATIONS_ID.unique()
 
 data_temperature = {
-    station: df[df["STATIONS_ID"] == station] for station in stations_id
+    station: airtemp_hourly[airtemp_hourly["STATIONS_ID"] == station]
+    for station in stations_id
 }
 
 coordinates = pd.read_csv(
@@ -52,6 +57,23 @@ month_marks = {
     11: "Nov",
     12: "Dec",
 }
+year_marks = {
+    1950: "1950",
+    1955: "",
+    1960: "1960",
+    1965: "",
+    1970: "1970",
+    1975: "",
+    1980: "1980",
+    1985: "",
+    1990: "1990",
+    1995: "",
+    2000: "2000",
+    2005: "",
+    2010: "2010",
+    2015: "",
+    2020: "2020",
+}
 
 # Step 2: Front-end
 app.layout = html.Div(
@@ -76,23 +98,7 @@ app.layout = html.Div(
             step=None,
             value=[1960, 2010],
             id="year-slider",
-            marks={
-                1950: "1950",
-                1955: "",
-                1960: "1960",
-                1965: "",
-                1970: "1970",
-                1975: "",
-                1980: "1980",
-                1985: "",
-                1990: "1990",
-                1995: "",
-                2000: "2000",
-                2005: "",
-                2010: "2010",
-                2015: "",
-                2020: "2020",
-            },
+            marks=year_marks,
         ),
         html.H4("Select the reference period"),
         dcc.RangeSlider(
@@ -101,23 +107,7 @@ app.layout = html.Div(
             step=None,
             value=[1960, 1980],
             id="reference_slider",
-            marks={
-                1950: "1950",
-                1955: "",
-                1960: "1960",
-                1965: "",
-                1970: "1970",
-                1975: "",
-                1980: "1980",
-                1985: "",
-                1990: "1990",
-                1995: "",
-                2000: "2000",
-                2005: "",
-                2010: "2010",
-                2015: "",
-                2020: "2020",
-            },
+            marks=year_marks,
         ),
         html.H4("Select the disease parameters"),
         html.H4("Month"),
@@ -156,31 +146,24 @@ def update_figure(selected_years, parameter, id, reference, month):
             reference[0],
             reference[1],
         )
-        filtered_df = data_temperature[id]
-        filtered_df = filtered_df[
-            (filtered_df.year >= selected_years[0])
-            & (filtered_df.year <= selected_years[1])
-        ]
-        filtered_df = filtered_df[
-            (filtered_df.month >= month[0]) & (filtered_df.month <= month[1])
-        ]
+        df = data_temperature[id]
+        df = df[(df.year >= selected_years[0]) & (df.year <= selected_years[1])]
+        df = df[(df.month >= month[0]) & (df.month <= month[1])]
         # print(month[0], month[1], filtered_df.month.unique())
-        filtered_df = filtered_df.groupby("year").mean()
-        ref_df = filtered_df[
-            (filtered_df.index >= reference[0]) & (filtered_df.index <= reference[1])
-        ]
+        df = df.groupby("year").mean()
+        ref_df = df[(df.index >= reference[0]) & (df.index <= reference[1])]
         avg_hist = ref_df["TT_TU"].mean()
         max_hist = ref_df["TT_TU"].max()
         min_hist = ref_df["TT_TU"].min()
-        filtered_df["7yrs_average"] = filtered_df.TT_TU.rolling(7).mean()
+        df["7yrs_average"] = df.TT_TU.rolling(7).mean()
         fig = px.line(
-            x=filtered_df.index,
+            x=df.index,
             y=[
-                filtered_df.TT_TU,
-                filtered_df["7yrs_average"],
-                [max_hist for x in filtered_df.TT_TU],
-                [avg_hist for x in filtered_df.TT_TU],
-                [min_hist for x in filtered_df.TT_TU],
+                df.TT_TU,
+                df["7yrs_average"],
+                [max_hist for x in df.TT_TU],
+                [avg_hist for x in df.TT_TU],
+                [min_hist for x in df.TT_TU],
             ],
             color_discrete_sequence=["blue", "orange", "red", "green", "black"],
             # template="simple_white",
