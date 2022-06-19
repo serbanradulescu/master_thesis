@@ -5,8 +5,8 @@ import json
 
 app = Dash(__name__)
 
-# Step 1. Preparing the elements for the app
 
+# Step 1. Preparing the elements for the app
 # a. Getting the data:
 
 airtemp_hourly = pd.read_csv(
