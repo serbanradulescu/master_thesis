@@ -28,10 +28,30 @@ ge_map = px.scatter_geo(
     lon=coordinates.lon, lat=coordinates.lat, hover_name=coordinates.id
 )
 ge_map.update_layout(
-    title="Locations in Germany<br>(Hover for id)",
+    title="Locations in Germany<br>(click on the map)<br>",
+    title_x=0.5,
     geo_scope="europe",
     geo=dict(projection_scale=7, center=dict(lat=51.5, lon=10)),
+    clickmode="event+select",
 )
+ge_map.update_traces(
+    marker=dict(size=12, line=dict(width=2, color="DarkSlateGrey")),
+    selector=dict(mode="markers"),
+)
+month_marks = {
+    1: "January",
+    2: "Feb",
+    3: "Mar",
+    4: "Apr",
+    5: "May",
+    6: "Jun",
+    7: "Jul",
+    8: "Aug",
+    9: "Sep",
+    10: "Oct",
+    11: "Nov",
+    12: "Dec",
+}
 
 # Step 2: Front-end
 app.layout = html.Div(
@@ -99,6 +119,11 @@ app.layout = html.Div(
                 2020: "2020",
             },
         ),
+        html.H4("Select the disease parameters"),
+        html.H4("Month"),
+        dcc.RangeSlider(
+            min=1, max=12, step=1, value=[4, 8], marks=month_marks, id="month-slider",
+        ),
         dcc.Graph(id="graph-with-slider"),
     ]
 )
@@ -112,8 +137,9 @@ app.layout = html.Div(
     Input("parameter", "value"),
     Input("basic-interactions", "clickData"),
     Input("reference_slider", "value"),
+    Input("month-slider", "value"),
 )
-def update_figure(selected_years, parameter, id, reference):
+def update_figure(selected_years, parameter, id, reference, month):
     if id == None:
         id = "01550"
     else:
@@ -135,6 +161,10 @@ def update_figure(selected_years, parameter, id, reference):
             (filtered_df.year >= selected_years[0])
             & (filtered_df.year <= selected_years[1])
         ]
+        filtered_df = filtered_df[
+            (filtered_df.month >= month[0]) & (filtered_df.month <= month[1])
+        ]
+        # print(month[0], month[1], filtered_df.month.unique())
         filtered_df = filtered_df.groupby("year").mean()
         ref_df = filtered_df[
             (filtered_df.index >= reference[0]) & (filtered_df.index <= reference[1])
