@@ -8,19 +8,6 @@ app = Dash(__name__)
 
 # Step 1. Preparing the elements for the app
 # a. Getting the data:
-"""
-airtemp_hourly = pd.read_csv("app_data/airtemp.csv")
-airtemp_hourly = airtemp_hourly[["STATIONS_ID", "TT_TU", "year", "day", "month"]]
-airtemp_hourly["STATIONS_ID"] = airtemp_hourly["STATIONS_ID"].apply(
-    lambda x: str(x).zfill(5)
-)
-
-
-data_temperature = {
-    station: airtemp_hourly[airtemp_hourly["STATIONS_ID"] == station]
-    for station in stations_id
-}
-"""
 
 coordinates = pd.read_csv("app_data/coordinates.csv")
 coordinates.id = coordinates.id.apply(lambda x: str(x).zfill(5))
