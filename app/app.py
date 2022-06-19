@@ -5,6 +5,10 @@ import json
 
 app = Dash(__name__)
 
+# Step 1. Preparing the elements for the app
+
+# a. Getting the data:
+
 df = pd.read_csv("/Users/serbanradulescu/Documents/master_thesis/app/airtemp.csv")
 df = df[["STATIONS_ID", "TT_TU", "year", "day", "month"]]
 df["STATIONS_ID"] = df["STATIONS_ID"].apply(lambda x: str(x).zfill(5))
@@ -18,16 +22,18 @@ coordinates = pd.read_csv(
     "/Users/serbanradulescu/Documents/master_thesis/app/coordinates.csv"
 )
 coordinates.id = coordinates.id.apply(lambda x: str(x).zfill(5))
+
+# b. Plotting the map for Germany:
 ge_map = px.scatter_geo(
     lon=coordinates.lon, lat=coordinates.lat, hover_name=coordinates.id
-)  # , locations="iso_alpha")
+)
 ge_map.update_layout(
     title="Locations in Germany<br>(Hover for id)",
     geo_scope="europe",
     geo=dict(projection_scale=7, center=dict(lat=51.5, lon=10)),
-    clickmode="event+select",
 )
 
+# Step 2: Front-end
 app.layout = html.Div(
     [
         html.H2("Effects of climate change on plant disease parameters in Germany"),
@@ -41,9 +47,8 @@ app.layout = html.Div(
             id="parameter",
         ),
         html.H4("Select the ids"),
-        dcc.Dropdown(options=df.STATIONS_ID.unique(), value="01550", id="stations_id"),
-        dcc.Graph(figure=ge_map, id="basic-interactions",),
-        html.Div(id="map-selector"),
+        # dcc.Dropdown(options=df.STATIONS_ID.unique(), value="01550", id="stations_id"),
+        dcc.Graph(figure=ge_map, id="basic-interactions", clickData=None),
         html.H4("Select the time range"),
         dcc.RangeSlider(
             min=1950,
@@ -98,25 +103,22 @@ app.layout = html.Div(
     ]
 )
 
-
-@app.callback(
-    Output("map-selector", "children"), Input("basic-interactions", "clickData")
-)
-def display_click_data(clickData):
-    if clickData == None:
-        return "Not yet selected"
-    selected_id = clickData["points"][0]["hovertext"]
-    return f"mda {selected_id} "
+# Step 3: Back-end
 
 
 @app.callback(
     Output("graph-with-slider", "figure"),
     Input("year-slider", "value"),
     Input("parameter", "value"),
-    Input("stations_id", "value"),
+    Input("basic-interactions", "clickData"),
     Input("reference_slider", "value"),
 )
 def update_figure(selected_years, parameter, id, reference):
+    if id == None:
+        id = "01550"
+    else:
+        id = id["points"][0]["hovertext"]
+    print("id is", id)
     # CASE 1: parameter is temperature
     if parameter == "temperature":
 
@@ -161,7 +163,6 @@ def update_figure(selected_years, parameter, id, reference):
             "wide_variable_4": "historic minim",
         }
         fig.for_each_trace(lambda t: t.update(name=newnames[t.name]))
-        # fig.update_layout()
         fig.update_layout(
             title="Average temperatures in Germany point selected",
             xaxis_title="year",
@@ -173,11 +174,6 @@ def update_figure(selected_years, parameter, id, reference):
     else:
         fig = px.line(x=[1, 2, 3], y=[3, 4, 5], title="other plot")
     return fig
-
-
-# df = pd.read_csv("airtemp.csv")
-# df = df.groupby("year")
-# fig = px.scatter(x=df.index, y=df.TT_TU)
 
 
 if __name__ == "__main__":
