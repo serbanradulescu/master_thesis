@@ -96,7 +96,12 @@ app.layout = html.Div(
         html.H4("Select the disease parameters"),
         html.H4("Month"),
         dcc.RangeSlider(
-            min=1, max=12, step=1, value=[4, 8], marks=month_marks, id="month-slider",
+            min=1,
+            max=12,
+            step=1,
+            value=[4, 8],
+            marks=month_marks,
+            id="month-slider",
         ),
         dcc.Graph(id="graph-with-slider"),
     ]
@@ -175,3 +180,6 @@ def update_figure(selected_years, parameter, id, reference, month):
 
 if __name__ == "__main__":
     app.run_server(debug=True)
+
+# a = eval("lambda x: print('hello {0}'.format(x))")
+# a("mata") # prints "hello world"
