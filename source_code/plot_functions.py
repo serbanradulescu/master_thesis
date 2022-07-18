@@ -80,7 +80,7 @@ def plot_optimal_temperature(
     plt.figtext(
         0.15,
         0.021,
-        f"""Figure 1. Variation of optimal temperature % for Septoria tritici in Germany from 1950 - 2020 compared to the reference period of ({hist_start} - {hist_end}). Optimal temperature 
+        f""" \n Figure 1. Variation of optimal temperature % for Septoria tritici in Germany from 1950 - 2020 compared to the reference period of ({hist_start} - {hist_end}). Optimal temperature 
         \n is considered when air  temperature is between {temp_min} and {temp_max} degrees Celsius. The yearly time range is between sowing of wheat and harvesting in Germany, which is considered: {start_dd_mm} - {end_dd_mm},
         \n corresponding to the interval when 90% of the crop was is in that stage """,
     )
