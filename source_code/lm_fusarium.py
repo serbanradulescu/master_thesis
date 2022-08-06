@@ -1,6 +1,8 @@
 from scipy.stats import linregress
 from scipy import stats
 import pandas as pd
+from numpy import sqrt
+from typing import Optional
 
 from source_code.general_functions import select_time_range
 
@@ -118,6 +120,7 @@ def linear_model_combined(
     func1,
     func2,
     year_minus: int = 0,
+    transf: Optional[str] = None,
 ):
     results = pd.DataFrame(
         columns=[
@@ -153,10 +156,22 @@ def linear_model_combined(
     df_merged["rh_risk"] = df_merged.RF_STD.apply(func2)
 
     # Step 2.4: overall risk (combined)
-    df_merged["combined_risk"] = df_merged.apply(
-        lambda x: (x["rh_risk"] * x["t_risk"]), axis=1
-    )
-
+    if transf == None:
+        df_merged["combined_risk"] = df_merged.apply(
+            lambda x: (x["rh_risk"] * x["t_risk"]), axis=1
+        )
+    elif transf == "sqrt":
+        df_merged["combined_risk"] = df_merged.apply(
+            lambda x: sqrt(x["rh_risk"] * x["t_risk"]), axis=1
+        )
+    elif transf == "LTRH80":
+        df_merged["combined_risk"] = df_merged.apply(
+            lambda x: x["t_risk"] if x["RF_STD"] > 80 else 0, axis=1
+        )
+    elif transf == "LTRH90":
+        df_merged["combined_risk"] = df_merged.apply(
+            lambda x: x["t_risk"] if x["RF_STD"] > 90 else 0, axis=1
+        )
     df = df_merged.copy()
     for station in df.STATIONS_ID.unique():
         save_station = station

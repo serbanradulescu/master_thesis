@@ -1,9 +1,7 @@
 ,category,count,details
-0,1A,2,all risks increased
-1,1B,3,combined and temperature increased
-2,2A,6,"temperature and humidity increased, but combined not significant"
-3,2B,5,"temperature risk increased, humidity risk constant, combined not significant"
-4,2C,3,"temperature risk increased, humidity decreased, combined not significant"
-5,3A,1,decreasing but temperature increased
-6,3B,2,"temperature risk increasing, humidity risk constant and combined decreasing"
-7,AN,1,anomaly
+0,1A,4,all risks increased
+1,1B,6,combined and temperature increased
+2,1C,4,"combined, temperature increased, humidity did not"
+3,2A,2,"temperature and humidity increased, but combined not significant"
+4,2B,2,"temperature risk increased, humidity risk constant, combined not significant"
+5,2C,1,"temperature risk increased, humidity decreased, combined not significant"

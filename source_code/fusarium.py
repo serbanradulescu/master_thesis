@@ -1,6 +1,7 @@
+from cmath import sqrt
 import seaborn as sns
 import pandas as pd
-from typing import List
+from typing import List, Optional
 import matplotlib.transforms as mtransforms
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -73,7 +74,9 @@ def plot_risk_fusarium(
     min_hist = df_airtemp[
         (df_airtemp.index <= hist_end) & (df_airtemp.index >= hist_start)  # type: ignore
     ]["useful_t"].min()
-    df_airtemp[f"{moving_average}years_average"] = df_airtemp.useful_t.rolling(7).mean()
+    df_airtemp[f"{moving_average}years_average"] = df_airtemp.useful_t.rolling(
+        moving_average
+    ).mean()
 
     # Step 3.2: for moisture
     df_moisture = df_moisture.groupby(["year"]).mean()
@@ -200,7 +203,7 @@ def plot_combined_risk_fusarium(
     start_dd_mm: str,
     end_dd_mm: str,
     moving_average: int,
-    hours: List[int],
+    transf: Optional[str] = None,
 ):
 
     # Step 1: create the time intervals from the input "dd.mm"
@@ -226,9 +229,22 @@ def plot_combined_risk_fusarium(
     df_merged["rh_risk"] = df_merged.RF_STD.apply(equation_fusarium_rh)
 
     # Step 2.4: overall risk (combined)
-    df_merged["combined_risk"] = df_merged.apply(
-        lambda x: (x["rh_risk"] * x["t_risk"]), axis=1
-    )
+    if transf == None:
+        df_merged["combined_risk"] = df_merged.apply(
+            lambda x: (x["rh_risk"] * x["t_risk"]), axis=1
+        )
+    elif transf == "sqrt":
+        df_merged["combined_risk"] = df_merged.apply(
+            lambda x: sqrt(x["rh_risk"] * x["t_risk"]), axis=1
+        )
+    elif transf == "LTRH80":
+        df_merged["combined_risk"] = df_merged.apply(
+            lambda x: x["t_risk"] if x["RF_STD"] > 80 else 0, axis=1
+        )
+    elif transf == "LTRH90":
+        df_merged["combined_risk"] = df_merged.apply(
+            lambda x: x["t_risk"] if x["RF_STD"] > 90 else 0, axis=1
+        )
 
     # Step 2: apply the function for the model
     df_results = df_merged.groupby(["year"]).mean()
