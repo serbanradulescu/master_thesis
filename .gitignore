@@ -84,3 +84,8 @@ useful_scientific/produkt_zehn_min_rr_19930428_19991231_00003.txt
 test_function.csv
 *.pyc
 source_code/old_code.ipynb
+.venv/bin/python
+.venv/bin/python3
+.venv/bin/python3.10
+.venv/lib64
+.venv/pyvenv.cfg
