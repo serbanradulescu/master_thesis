@@ -32,7 +32,7 @@ def equation_fusarium_rh(rh: float) -> float:
         rh = 100
     c = 0.850
     y = c ** (100 - rh)
-    return y * 1 / 0.85
+    return y * 1 / (0.7225 * 1.3840830449826989)
 
 
 def plot_risk_fusarium(

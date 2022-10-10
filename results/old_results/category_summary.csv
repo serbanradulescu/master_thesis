@@ -6,4 +6,4 @@
 4,2C,3,"temperature risk increased, humidity decreased, combined not significant"
 5,3A,1,decreasing but temperature increased
 6,3B,2,"temperature risk increasing, humidity risk constant and combined decreasing"
-7,3C,1,-++
+7,3C,1,+--
