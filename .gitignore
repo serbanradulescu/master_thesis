@@ -89,3 +89,4 @@ source_code/old_code.ipynb
 .venv/bin/python3.10
 .venv/lib64
 .venv/pyvenv.cfg
+temperature_dif_values.csv

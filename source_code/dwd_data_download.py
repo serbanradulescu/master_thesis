@@ -20,7 +20,24 @@ def download_dwd_data(
     dwd_links: dict,
     ids: Optional[str] = None,
     is_test=True,
-):
+) -> pd.DataFrame:
+    """ Downloads the requested data, selects the needed
+
+    Args:
+        parameter (str): "air_temperature","dew_point", "moisture" or "precipitation"
+        time (str): "10_minutes", "hourly" or "daily"
+        start_year (int): beginning of the time period for the data
+        end_year (int): end of the time period from the data
+        dwd_links (dict): the links generated with another funtions
+        ids (Optional[str], optional): ID's of the weather stations you want data on. Defaults to None.
+        is_test (bool, optional): For testing it only takes the first 5 stations if this value is true. Defaults to True.
+
+    Raises:
+        ValueError: Raises error if one of the mentioned ID's is not found
+
+    Returns:
+        pd.DataFrame: a dataframe with the requested data
+    """
     test_count = 0
     if is_test:
         limit = 4

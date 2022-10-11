@@ -8,6 +8,8 @@ import matplotlib.gridspec as gridspec
 
 from source_code.general_functions import select_time_range
 
+CONV_FACT = 96191163.12099737
+
 
 def equation_fusarium(t: float):
     tmin = 5
@@ -18,28 +20,27 @@ def equation_fusarium(t: float):
         return 0
     b, c = 17.2, 10.5
     teq = (t - tmin) / (tmax - tmin)
-    y = (teq**b) * ((1 - teq) ** c)
-    return y * 98294267.23029275 / 1.0218637974743057
+    y = (teq**b) * ((1 - teq) ** c) * CONV_FACT
+
+    return y
 
 
-# 𝑌=𝑐**(100−RH)/(1+𝑒 ** (𝑎−𝑏×𝑡))
+def equation_fusarium_t_2(t: float):
+    return 1
 
 
 def equation_fusarium_rh(rh: float) -> float:
-    # a = 1
-    # b = 2
+
     if rh > 100:
         rh = 100
     c = 0.850
     y = c ** (100 - rh)
-    return y * 1 / (0.7225 * 1.3840830449826989)
+    return y * 1
 
 
 def plot_risk_fusarium(
     df_airtemp: pd.DataFrame,
     df_moisture,
-    temp_min: float,
-    temp_max: float,
     hist_start: float,
     hist_end: float,
     start_dd_mm: str,
